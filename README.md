@@ -21,28 +21,9 @@ Most developers integrate ZKTeco biometric devices using legacy TCP polling over
 | **Latency** | Delayed by poll interval (e.g., 5-60 minutes) | Instantaneous; pushes punch logs within 1 second |
 | **Scalability** | High overhead for hundreds of distributed devices | Highly scalable; stateless HTTP handling |
 
-```
-[ ADMS HTTP Push Architecture ]
-
-+-------------------------+                     +---------------------------+
-|   ZKTeco Device         |                     |   ADMS Push Server        |
-|   (Client on LAN/4G)    |                     |   (Cloud / On-Premise)    |
-+-------------------------+                     +---------------------------+
-             |                                                |
-             | ---- 1. Handshake (GET /iclock/cdata) -------->|
-             |<---- 2. Sync Config (Stamp=0, Delay=10) -------|
-             |                                                |
-             | ---- 3. Heartbeat (GET /iclock/getrequest) --->|
-             |<---- 4. Adjusted HTTP Date Header (Timezone) --|
-             |                                                |
-   [ User Scans Finger ]                                      |
-             |                                                |
-             | ---- 5. Punch Log (POST /iclock/cdata) ------->|
-             |         (Tab-separated ATTLOG payload)         |--> [ SQLite / MySQL ]
-             |                                                |--> [ Webhook Forward ]
-             |<---- 6. Ack: "OK: <count>" --------------------|
-             |                                                |
-```
+<p align="center">
+  <img src="docs/architecture.png" alt="ZKTeco ADMS Real-Time HTTP Push Architecture Diagram" width="100%">
+</p>
 
 ---
 
@@ -112,6 +93,9 @@ zkteco-adms-server/
 ├── .env.example            # Environment variables template
 ├── Dockerfile              # Container definition
 ├── docker-compose.yml      # Docker Compose setup
+├── docs/
+│   ├── architecture.html   # Visual architecture diagram source code
+│   └── architecture.png    # High-resolution 2x retina diagram
 ├── systemd/
 │   └── zkteco-adms.service # Linux systemd service unit template
 └── nginx/

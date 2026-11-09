@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ZKTeco ADMS Push Architecture</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      width: 1200px;
+      padding: 36px 40px;
+      background: #090d16;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: #f1f5f9;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justifyContent: space-between;
+      align-items: center;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .header-title-box h1 {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .badge-open-source {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .header-sub {
+      font-size: 13.5px;
+      color: #94a3b8;
+      margin-top: 5px;
+    }
+    .protocol-tag {
+      font-family: "SF Mono", "Fira Code", "Courier New", monospace;
+      font-size: 12px;
+      padding: 6px 14px;
+      background: #131b2e;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 8px;
+      color: #38bdf8;
+    }
+
+    /* 3-Column Architecture Grid */
+    .arch-grid {
+      display: grid;
+      grid-template-columns: 310px 1fr 310px;
+      gap: 24px;
+      align-items: stretch;
+      position: relative;
+    }
+
+    /* Column Cards */
+    .node-card {
+      background: #111827;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 16px;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+      position: relative;
+    }
+    .node-card.client {
+      border-top: 4px solid #10b981;
+    }
+    .node-card.server {
+      border-top: 4px solid #0ea5e9;
+      background: #0f172a;
+    }
+    .node-card.dest {
+      border-top: 4px solid #8b5cf6;
+    }
+
+    .node-header {
+      display: flex;
+      justifyContent: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+    .node-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+    .node-subtitle {
+      font-size: 11.5px;
+      color: #94a3b8;
+      margin-top: 3px;
+    }
+    .node-pill {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .pill-green { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+    .pill-blue  { background: rgba(14, 165, 233, 0.2); color: #38bdf8; }
+    .pill-purple{ background: rgba(139, 92, 246, 0.2); color: #a78bfa; }
+
+    /* Module boxes inside cards */
+    .module-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+    .module-item {
+      background: #1a2234;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 10px;
+      padding: 11px 13px;
+    }
+    .module-item-title {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .module-item-desc {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    /* Highlight Feature Box (The Gotchas) */
+    .gotcha-box {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid;
+    }
+    .gotcha-timezone {
+      background: rgba(245, 158, 11, 0.08);
+      border-color: rgba(245, 158, 11, 0.35);
+    }
+    .gotcha-ack {
+      background: rgba(56, 189, 248, 0.08);
+      border-color: rgba(56, 189, 248, 0.35);
+    }
+    .gotcha-header {
+      font-size: 11.5px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+    .gotcha-timezone .gotcha-header { color: #fbbf24; }
+    .gotcha-ack .gotcha-header { color: #38bdf8; }
+    .code-badge {
+      font-family: "SF Mono", monospace;
+      font-size: 10px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #f8fafc;
+    }
+
+    /* Sequence Flow Strip at Bottom */
+    .flow-strip {
+      background: #0f172a;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 18px 24px;
+    }
+    .flow-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #94a3b8;
+      margin-bottom: 14px;
+      display: flex;
+      justifyContent: space-between;
+    }
+    .flow-steps {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      position: relative;
+    }
+    .step-card {
+      background: #172136;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .step-num {
+      font-size: 10px;
+      font-weight: 800;
+      color: #38bdf8;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .step-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 4px;
+    }
+    .step-detail {
+      font-size: 10.5px;
+      color: #94a3b8;
+      line-height: 1.35;
+      font-family: "SF Mono", monospace;
+    }
+
+    /* Visual Arrow Indicators between columns */
+    .flow-arrow-label {
+      font-size: 10px;
+      font-family: "SF Mono", monospace;
+      color: #38bdf8;
+      background: #090d16;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      display: inline-block;
+      margin-top: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <div class="header">
+    <div class="header-title-box">
+      <h1>
+        ZKTeco ADMS Real-Time HTTP Push Architecture
+        <span class="badge-open-source">Open Source</span>
+      </h1>
+      <div class="header-sub">Bi-directional event-driven sync with hardware timezone compensation and loop prevention</div>
+    </div>
+    <div class="protocol-tag">PORT 8080 • HTTP/1.1 ADMS SDK</div>
+  </div>
+
+  <!-- 3 Main Architecture Pillars -->
+  <div class="arch-grid">
+
+    <!-- Column 1: Client Device -->
+    <div class="node-card client">
+      <div class="node-header">
+        <div>
+          <div class="node-title">ZKTeco Biometric Terminal</div>
+          <div class="node-subtitle">Factory Floor / Remote Branch</div>
+        </div>
+        <span class="node-pill pill-green">Client</span>
+      </div>
+
+      <div class="module-list">
+        <div class="module-item">
+          <div class="module-item-title">
+            <span>👆</span> Hardware Authentication
+          </div>
+          <div class="module-item-desc">Fingerprint scanner, RFID card reader, PIN, or Face recognition.</div>
+        </div>
+
+        <div class="module-item">
+          <div class="module-item-title">
+            <span>🌐</span> Outbound HTTP Client
+          </div>
+          <div class="module-item-desc">Initiates all requests outward. Works behind cellular 4G modems, routers, and NAT firewalls. Zero port forwarding.</div>
+        </div>
+
+        <div class="module-item">
+          <div class="module-item-title">
+            <span>⏱️</span> Internal Hardware Clock
+          </div>
+          <div class="module-item-desc">Firmware reads HTTP Date header on heartbeats to lock the device clock.</div>
+        </div>
+
+        <div class="module-item">
+          <div class="module-item-title">
+            <span>📦</span> Local Flash Buffer
+          </div>
+          <div class="module-item-desc">Buffers punches offline if network drops; streams full backlog on reconnect.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Column 2: ADMS Server Core -->
+    <div class="node-card server">
+      <div class="node-header">
+        <div>
+          <div class="node-title">ADMS Push Server (Flask)</div>
+          <div class="node-subtitle">Cloud / On-Premise Gateway (app.py)</div>
+        </div>
+        <span class="node-pill pill-blue">Server Core</span>
+      </div>
+
+      <div class="module-list">
+        <!-- Discovery 1: Timezone -->
+        <div class="gotcha-box gotcha-timezone">
+          <div class="gotcha-header">
+            <span>⚙️</span> Timezone Compensation Engine
+          </div>
+          <div style="font-size: 11px; color: #fde68a; line-height: 1.4;">
+            Device hardcodes UTC+8. Server shifts Date header backwards:
+            <div style="margin-top: 4px;">
+              <span class="code-badge">Date: (UTC - Shift) + 8h = Local Time</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Endpoints -->
+        <div class="module-item" style="margin-top: 4px;">
+          <div class="module-item-title">
+            <span>🤝</span> Registration &amp; Handshake
+          </div>
+          <div class="module-item-desc">
+            <span class="code-badge">GET /iclock/cdata</span>
+            Dispatches sync parameters: Stamp=0, Delay=10, Realtime=1.
+          </div>
+        </div>
+
+        <div class="module-item">
+          <div class="module-item-title">
+            <span>💓</span> Heartbeat &amp; Command Dispatch
+          </div>
+          <div class="module-item-desc">
+            <span class="code-badge">GET /iclock/getrequest</span>
+            Monitors terminal connectivity every 10s and dispatches queued tasks.
+          </div>
+        </div>
+
+        <!-- Discovery 2: OK: count -->
+        <div class="gotcha-box gotcha-ack">
+          <div class="gotcha-header">
+            <span>🛡️</span> Retransmission Loop Shield
+          </div>
+          <div style="font-size: 11px; color: #bae6fd; line-height: 1.4;">
+            POST /iclock/cdata parses tab-separated punches. Server MUST respond with:
+            <div style="margin-top: 4px;">
+              <span class="code-badge">OK: &lt;count&gt;</span> (e.g. OK: 4) &mdash; prevents terminal resend loops!
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Column 3: Downstream Destinations -->
+    <div class="node-card dest">
+      <div class="node-header">
+        <div>
+          <div class="node-title">Downstream &amp; Storage</div>
+          <div class="node-subtitle">Enterprise Data Layer</div>
+        </div>
+        <span class="node-pill pill-purple">Persistence</span>
+      </div>
+
+      <div class="module-list">
+        <div class="module-item">
+          <div class="module-item-title">
+            <span>💾</span> Pluggable Storage Layer
+          </div>
+          <div class="module-item-desc">
+            <strong>SQLite:</strong> Zero-setup default (<span class="code-badge">attendance.db</span>)<br>
+            <strong>MySQL:</strong> High-throughput production database with unique key deduplication.
+          </div>
+        </div>
+
+        <div class="module-item">
+          <div class="module-item-title">
+            <span>🚀</span> Async Webhook Forwarder
+          </div>
+          <div class="module-item-desc">Coalesces bursts and pushes JSON payloads to external REST endpoints in real-time.</div>
+        </div>
+
+        <div class="module-item">
+          <div class="module-item-title">
+            <span>🏢</span> Enterprise ERP &amp; Payroll
+          </div>
+          <div class="module-item-desc">Feeds into automated payroll microservices, SAP, Odoo, or custom HR portals.</div>
+        </div>
+
+        <div class="module-item">
+          <div class="module-item-title">
+            <span>🔄</span> Legacy Polling Client
+          </div>
+          <div class="module-item-desc">Fallback script (<span class="code-badge">poll_device.py</span>) querying port 4370 for older terminals.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Step-by-Step Sequence Flow Strip -->
+  <div class="flow-strip">
+    <div class="flow-title">
+      <span>Protocol Request &amp; Response Lifecycle</span>
+      <span style="font-size: 11px; color: #38bdf8;">Stateless HTTP &bull; Low Latency &bull; Zero Inbound Firewall Rules</span>
+    </div>
+    <div class="flow-steps">
+      <div class="step-card">
+        <div class="step-num">Step 1</div>
+        <div class="step-name">Device Boot</div>
+        <div class="step-detail">Terminal calls GET /iclock/cdata?SN=... Server returns Stamp=0 &amp; Delay=10.</div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-num">Step 2</div>
+        <div class="step-name">Time Sync</div>
+        <div class="step-detail">Heartbeat GET /iclock/getrequest. Server shifts Date header to counteract UTC+8 bug.</div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-num">Step 3</div>
+        <div class="step-name">Biometric Punch</div>
+        <div class="step-detail">User clocks in. Device instantly POSTs tab-separated ATTLOG payload to server.</div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-num">Step 4</div>
+        <div class="step-name">Exact Ack</div>
+        <div class="step-detail">Server inserts records, deduplicates, and responds with mandatory "OK: &lt;count&gt;".</div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-num">Step 5</div>
+        <div class="step-name">ERP Pipeline</div>
+        <div class="step-detail">Background worker forwards punched batch via Webhook to Payroll microservice.</div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
