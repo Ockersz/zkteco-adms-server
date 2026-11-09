@@ -7,8 +7,6 @@ canonical_url: "https://shahein-portfolio.vercel.app/"
 cover_image: "https://raw.githubusercontent.com/Ockersz/zkteco-adms-server/main/docs/architecture.png"
 ---
 
-# Solving the Undocumented ZKTeco ADMS Protocol: Hardware Timezones, Infinite Loops, and Python HTTP Push
-
 If you have ever been tasked with integrating physical biometric terminals (like ZKTeco F22, IN01, K40, or uFace) with an enterprise web application or ERP, you likely started where everyone does: **legacy TCP polling over port 4370**.
 
 And like most engineers, you quickly hit a brick wall:
@@ -51,10 +49,11 @@ Even if you manually configure the device's clock or local timezone in its physi
 ### The Solution: Compensatory Date Header Shifting
 Rather than fighting the terminal's proprietary firmware, we can compensate at the server level by shifting the HTTP `Date` header backwards:
 
-$$\text{Shift} = \text{Device Factory Offset (UTC+8)} - \text{Target Local Offset}$$
+> **Compensatory Date Shift Formula:**  
+> `Date Header Shift = Device Factory Offset (UTC+8) - Target Local Offset`
 
-For UTC+5:30:
-$$\text{Shift} = 8.0 - 5.5 = 2.5\text{ hours (2 hours, 30 minutes)}$$
+For Sri Lanka or India (UTC+5:30):  
+> `Shift = 8.0 - 5.5 = 2.5 hours (2 hours, 30 minutes backward)`
 
 We implement this in Python Flask using an `@app.after_request` middleware:
 
@@ -165,6 +164,7 @@ Working with proprietary IoT and enterprise hardware often requires reading betw
 Feel free to star or fork the repository on [GitHub](https://github.com/Ockersz/zkteco-adms-server) or connect with me on [LinkedIn](https://www.linkedin.com/in/shahein-ockersz/).
 
 ---
-*Author: **Shahein Noel Ockersz** — Senior Software Engineer | Systems Architect*  
-*Portfolio: [shahein-portfolio.vercel.app](https://shahein-portfolio.vercel.app/)*
 
+**Author:** **Shahein Noel Ockersz** | Senior Software Engineer & Systems Architect  
+**Live Portfolio:** [shahein-portfolio.vercel.app](https://shahein-portfolio.vercel.app/)  
+**GitHub:** [github.com/Ockersz](https://github.com/Ockersz) | **LinkedIn:** [linkedin.com/in/shahein-ockersz](https://www.linkedin.com/in/shahein-ockersz/)
