@@ -1,6 +1,6 @@
 ---
 title: "Solving the Undocumented ZKTeco ADMS Protocol: Hardware Timezones, Infinite Loops, and Python HTTP Push"
-published: false
+published: true
 description: "How to build a reliable ZKTeco ADMS biometric HTTP push receiver in Python, fix the hardcoded factory UTC+8 timezone bug, and prevent infinite retransmission loops."
 tags: python, iot, architecture, backend
 canonical_url: "https://shahein-portfolio.vercel.app/"
