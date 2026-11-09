@@ -1,0 +1,32 @@
+[Unit]
+Description=ZKTeco ADMS Push Receiver Service
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/opt/zkteco-adms-server
+
+# Virtualenv Python binary
+ExecStart=/opt/zkteco-adms-server/venv/bin/python3 app.py
+
+# Environment configuration
+Environment=SERVER_HOST=0.0.0.0
+Environment=SERVER_PORT=8080
+Environment=DEVICE_UTC_OFFSET_HOURS=8.0
+Environment=SERVER_UTC_OFFSET_HOURS=5.5
+Environment=DB_ENGINE=sqlite
+Environment=DB_SQLITE_PATH=/opt/zkteco-adms-server/attendance.db
+
+# Automatic restart on failure
+Restart=always
+RestartSec=5s
+
+# Standard logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=zkteco-adms
+
+[Install]
+WantedBy=multi-user.target

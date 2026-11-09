@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  zkteco-adms:
+    build: .
+    container_name: zkteco-adms-server
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - SERVER_HOST=0.0.0.0
+      - SERVER_PORT=8080
+      - DEVICE_UTC_OFFSET_HOURS=8.0
+      - SERVER_UTC_OFFSET_HOURS=5.5
+      - DATE_HEADER_SHIFT_HOURS=2.5
+      - DB_ENGINE=sqlite
+      - DB_SQLITE_PATH=/app/data/attendance.db
+    volumes:
+      - ./data:/app/data
