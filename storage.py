@@ -223,3 +223,4 @@ def mark_punches_synced(ids: List[int]):
         finally:
             cursor.close()
             conn.close()
+

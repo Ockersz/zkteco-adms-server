@@ -30,3 +30,4 @@ SyslogIdentifier=zkteco-adms
 
 [Install]
 WantedBy=multi-user.target
+

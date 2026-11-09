@@ -17,3 +17,4 @@ services:
       - DB_SQLITE_PATH=/app/data/attendance.db
     volumes:
       - ./data:/app/data
+
